@@ -71,38 +71,36 @@ export default function MoneyReceiptForm() {
 
   const amountInWords = form.amount > 0 ? numberToWords(form.amount) : "";
 
-  const checkedMethods = form.paymentMethods.filter((m) => m.checked);
-
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between px-8 py-4 border-b border-neutral-300 bg-white">
-        <div>
+      <div className="flex items-center justify-between gap-3 px-4 md:px-8 py-4 border-b border-neutral-300 bg-white">
+        <div className="min-w-0">
           <h2 className="text-sm font-medium text-neutral-900">
             Money Receipt
           </h2>
-          <p className="text-xs text-neutral-600 mt-0.5">
+          <p className="text-xs text-neutral-600 mt-0.5 truncate">
             Issue a payment receipt — Aevitas
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowPDF((v) => !v)}
             className="px-3 py-1.5 text-xs font-medium text-neutral-700 hover:text-neutral-900 border border-neutral-400 rounded-md hover:bg-neutral-200 transition-colors"
           >
-            {showPDF ? "Close preview" : "Preview"}
+            {showPDF ? "Close" : "Preview"}
           </button>
         </div>
       </div>
 
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row min-h-0">
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-8 py-8 space-y-8">
+          <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
             {/* Receipt Details */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Receipt Details
               </h3>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-xs text-neutral-700 mb-1.5">
                     Receipt No
@@ -145,8 +143,8 @@ export default function MoneyReceiptForm() {
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Student Info
               </h3>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="md:col-span-2">
                   <label className="block text-xs text-neutral-700 mb-1.5">
                     Student Name
                   </label>
@@ -224,8 +222,8 @@ export default function MoneyReceiptForm() {
               </h3>
               <div className="space-y-3">
                 {form.paymentMethods.map((method, idx) => (
-                  <div key={method.method} className="flex items-start gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer mt-0.5">
+                  <div key={method.method} className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer shrink-0">
                       <input
                         type="checkbox"
                         checked={method.checked}
@@ -242,7 +240,7 @@ export default function MoneyReceiptForm() {
                         value={method.details}
                         onChange={(e) => updateMethodDetail(idx, e.target.value)}
                         placeholder={METHOD_PLACEHOLDERS[method.method]}
-                        className="flex-1 text-sm bg-transparent border-b border-neutral-400 pb-1 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                        className="w-full sm:flex-1 text-sm bg-transparent border-b border-neutral-400 pb-1 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
                       />
                     )}
                   </div>
@@ -253,7 +251,7 @@ export default function MoneyReceiptForm() {
         </div>
 
         {showPDF && (
-          <div className="w-[480px] shrink-0 border-l border-neutral-300 bg-white">
+          <div className="w-full md:w-[480px] h-80 md:h-auto shrink-0 border-t md:border-t-0 md:border-l border-neutral-300 bg-white">
             <PDFViewer
               style={{ width: "100%", height: "100%", border: "none" }}
               showToolbar
