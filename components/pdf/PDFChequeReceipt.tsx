@@ -1,6 +1,6 @@
 "use client";
 
-import { Document, Page, View, Text, StyleSheet, Svg, Path } from "@react-pdf/renderer";
+import { Document, Page, View, Text, StyleSheet, Svg, Path, Circle, Line, G } from "@react-pdf/renderer";
 import { MoneyReceiptFormState, ReportHeaderDto } from "@/lib/types";
 import { numberToWords } from "@/lib/utils";
 import PDFHeader from "./PDFHeader";
@@ -180,15 +180,20 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   cutLine: {
-    borderBottom: "1pt dashed #9ca3af",
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 8,
-    textAlign: "center",
+    gap: 6,
   },
-  cutText: {
-    fontSize: 7.5,
-    color: "#9ca3af",
-    textAlign: "center",
-    marginTop: -9,
+  cutDash: {
+    flex: 1,
+    borderBottom: "1pt dashed #9ca3af",
+  },
+  shortDash: {
+    width: 24, 
+    borderBottomWidth: 1,
+    borderBottomColor: "#9ca3af",
+    borderBottomStyle: "dashed",
   },
 });
 
@@ -288,11 +293,7 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
         <View style={styles.sigRow}>
           <View style={styles.sigBlock}>
             <View style={styles.sigLine} />
-            <Text style={styles.sigLabel}>Authorized Signature</Text>
-          </View>
-          <View style={styles.sigBlock}>
-            <View style={styles.sigLine} />
-            <Text style={styles.sigLabel}>Accounts Signature</Text>
+            <Text style={styles.sigLabel}>Received By {formState.receiverName}</Text>
           </View>
         </View>
 
@@ -319,7 +320,34 @@ export default function PDFChequeReceipt({ formState }: Props) {
         </View>
 
         <View style={styles.cutLine}>
-          <Text style={styles.cutText}>- - - - - - - - - - - CUT HERE - - - - - - - - - - -</Text>
+          {/* শুরুর ছোট ড্যাশ লাইন */}
+          <View style={styles.shortDash} />
+
+          {/* বামের কাঁচি (ডানদিকে মুখ করা - 90 Degree Rotate) */}
+          <Svg width={14} height={14} viewBox="0 0 16 16">
+            <G transform="rotate(90, 8, 8)">
+              <Path
+                d="M3.5 3.5c-.614-.884-.074-1.962.858-2.5L8 7.226 11.642 1c.932.538 1.472 1.616.858 2.5L8.81 8.61l1.556 2.661a2.5 2.5 0 1 1-.794.637L8 9.73l-1.572 2.177a2.5 2.5 0 1 1-.794-.637L7.19 8.61zm2.5 10a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0m7 0a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"
+                stroke="#9ca3af" strokeWidth={0.5} fill="none"
+              />
+            </G>
+          </Svg>
+
+          {/* মাঝখানের লম্বা ড্যাশ লাইন */}
+          <View style={styles.cutDash} />
+
+          {/* ডানের কাঁচি (বামদিকে মুখ করা - Negative 90 Degree Rotate) */}
+          <Svg width={14} height={14} viewBox="0 0 16 16">
+            <G transform="rotate(-90, 8, 8)">
+              <Path
+                d="M3.5 3.5c-.614-.884-.074-1.962.858-2.5L8 7.226 11.642 1c.932.538 1.472 1.616.858 2.5L8.81 8.61l1.556 2.661a2.5 2.5 0 1 1-.794.637L8 9.73l-1.572 2.177a2.5 2.5 0 1 1-.794-.637L7.19 8.61zm2.5 10a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0m7 0a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"
+                stroke="#9ca3af" strokeWidth={0.5} fill="none"
+              />
+            </G>
+          </Svg>
+
+          {/* শেষের ছোট ড্যাশ লাইন */}
+          <View style={styles.shortDash} />
         </View>
 
         <View style={styles.half}>

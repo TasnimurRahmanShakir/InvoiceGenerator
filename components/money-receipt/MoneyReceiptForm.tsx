@@ -17,7 +17,7 @@ const DEFAULT_METHODS: PaymentMethodDetail[] = [
 function getDefaultForm(): MoneyReceiptFormState {
   const today = new Date().toISOString().split("T")[0];
   return {
-    receiptNo: `AIS-RCT-${Date.now().toString(36).toUpperCase()}`,
+    receiptNo: `AIS-MR-${Date.now().toString(36).toUpperCase()}`,
     invoiceNo: "",
     studentName: "",
     studentId: "",
@@ -26,6 +26,7 @@ function getDefaultForm(): MoneyReceiptFormState {
     purpose: "",
     amount: 0,
     date: today,
+    receiverName: "",
     paymentMethods: DEFAULT_METHODS.map((m) => ({ ...m })),
   };
 }
@@ -84,7 +85,7 @@ export default function MoneyReceiptForm() {
           </button>
           <button
             onClick={handleGenerate}
-            disabled={!form.payerName || form.amount <= 0}
+            disabled={!form.payerName || !form.receiverName || form.amount <= 0}
             className="px-4 py-1.5 text-xs font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             PDF
@@ -266,6 +267,27 @@ export default function MoneyReceiptForm() {
                     {method.method}
                   </button>
                 ))}
+              </div>
+            </section>
+
+            {/* Receiver */}
+            <section>
+              <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
+                Receiver
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div>
+                  <label className="block text-xs text-neutral-700 mb-1.5">
+                    Receiver Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={form.receiverName}
+                    onChange={(e) => updateField("receiverName", e.target.value)}
+                    placeholder="Name of person receiving"
+                    className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                  />
+                </div>
               </div>
             </section>
           </div>

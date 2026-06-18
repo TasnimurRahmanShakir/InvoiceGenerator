@@ -121,5 +121,6 @@ export interface MoneyReceiptFormState {
   purpose: string;
   amount: number;
   date: string;
+  receiverName: string;
   paymentMethods: PaymentMethodDetail[];
 }
