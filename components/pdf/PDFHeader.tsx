@@ -10,64 +10,43 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
+    justifyContent: "space-between",
   },
-  logoBox: {
-    width: 80,
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+  leftCol: {
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
   },
-  logoImg: {
-    width: 80,
-    height: 50,
-    objectFit: "contain",
-  },
-  centerCol: {
-    flex: 1,
-  },
-  companyName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0a2351",
-    textAlign: "center",
-  },
-  tagline: {
-    fontSize: 8,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 1,
-  },
-  address: {
-    fontSize: 9,
-    color: "#424242",
-    textAlign: "center",
-    marginTop: 2,
-  },
-  mobile: {
-    fontSize: 9,
-    color: "#424242",
-    textAlign: "center",
+  rightCol: {
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+    marginRight: 0,    
+    paddingRight: 0,   
   },
   title: {
-    fontSize: 13,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#0a2351",
-    textAlign: "center",
-    marginTop: 5,
+    textAlign: "left",
+    marginBottom: 6,
   },
-  dateCol: {
-    width: 120,
-    alignItems: "flex-end",
-  },
-  dateText: {
-    fontSize: 9,
+  infoTextLeft: {
+    fontSize: 10,
     color: "#424242",
-    textAlign: "right",
+    textAlign: "left",
+    marginBottom: 2,
+  },
+  logoImg: {
+    width: 130,
+    height: 50,
+    objectFit: "contain",
+    marginBottom: 4,
+    marginRight: 0,    // Logo strictly attached to the right edge
   },
   divider: {
-    borderBottom: "1pt solid #DEE2E6",
-    marginTop: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#DEE2E6",
+    borderBottomStyle: "solid",
+    marginTop: 12,
   },
 });
 
@@ -77,23 +56,22 @@ export default function PDFHeader({ header }: { header: ReportHeaderDto }) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <View style={styles.logoBox}>
-          <Image style={styles.logoImg} src="/file.svg" />
-        </View>
-
-        <View style={styles.centerCol}>
-          <Text style={styles.companyName}>{header.companyName}</Text>
-          <Text style={styles.tagline}>International School</Text>
-          <Text style={styles.address}>{header.address}</Text>
-          {header.mobile ? <Text style={styles.mobile}>Mobile: {header.mobile}</Text> : null}
+        
+        {/* Left Side: Title, Date, Invoice No */}
+        <View style={styles.leftCol}>
           <Text style={styles.title}>{header.title}</Text>
-        </View>
-
-        <View style={styles.dateCol}>
           {dateLines.map((line, i) => (
-            <Text key={i} style={styles.dateText}>{line}</Text>
+            <Text key={i} style={styles.infoTextLeft}>
+              {line}
+            </Text>
           ))}
         </View>
+
+        {/* Right Side: Logo */}
+        <View style={styles.rightCol}>
+          <Image style={styles.logoImg} src="/AEVITAS.png" />
+        </View>
+
       </View>
 
       <View style={styles.divider} />

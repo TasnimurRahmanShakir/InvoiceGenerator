@@ -101,13 +101,16 @@ export default function InvoiceForm() {
 
   const reportTableData = mapInvoiceToReportTableData(formState);
 
-  const itemsTotal = formState.items.reduce(
-    (s, i) => s + i.unitPrice * i.quantity,
-    0
-  );
-  const grandTotal = formState.discount > 0
-    ? itemsTotal - formState.discount
-    : itemsTotal;
+  const hasAdmission = formState.items.some((i) => i.feeItemId === "ADMISSION");
+  const admissionItem = formState.items.find((i) => i.feeItemId === "ADMISSION");
+  const admissionTotal = admissionItem ? admissionItem.unitPrice * admissionItem.quantity : 0;
+  const otherTotal = formState.items
+    .filter((i) => i.feeItemId !== "ADMISSION")
+    .reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  const discountedAdmission = hasAdmission && formState.discount > 0
+    ? admissionTotal - formState.discount
+    : admissionTotal;
+  const grandTotal = discountedAdmission + otherTotal;
 
   return (
     <div className="h-full flex flex-col">
@@ -245,18 +248,9 @@ export default function InvoiceForm() {
 
           {/* Fee Items */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider">
-                Fee Items
-              </h3>
-              <button
-                type="button"
-                onClick={handleAddItem}
-                className="text-xs font-medium text-neutral-700 hover:text-neutral-900 border border-neutral-400 px-2.5 py-1 rounded-md hover:bg-neutral-100 transition-colors"
-              >
-                + Add Item
-              </button>
-            </div>
+            <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
+              Fee Items
+            </h3>
 
             {formState.items.map((item, index) => {
               const currentFee = availableFees.find((f) => f.id === item.feeItemId);
@@ -362,30 +356,50 @@ export default function InvoiceForm() {
 
             {formState.items.length === 0 && (
               <p className="text-xs text-neutral-500 text-center py-8">
-                No fee items added. Click &quot;+ Add Item&quot; to begin.
+                No fee items added. Click &quot;Add Item&quot; below to begin.
               </p>
             )}
+
+            <button
+              type="button"
+              onClick={handleAddItem}
+              className="mt-2 text-xs font-medium text-neutral-700 hover:text-neutral-900 border border-neutral-400 px-2.5 py-1 rounded-md hover:bg-neutral-100 transition-colors"
+            >
+              + Add Item
+            </button>
           </section>
 
           {/* Fee Summary */}
           {formState.items.length > 0 && (
             <section className="border-t border-neutral-300 pt-4">
-              {formState.discount > 0 && (
+              {hasAdmission && (
+                <div className="flex justify-between text-sm text-neutral-700 mb-2">
+                  <span>Admission Fee</span>
+                  <span>{admissionTotal.toLocaleString()} BDT</span>
+                </div>
+              )}
+              {hasAdmission && formState.discount > 0 && (
                 <>
-                  <div className="flex justify-between text-sm text-neutral-700 mb-2">
-                    <span>Sub Total</span>
-                    <span>{itemsTotal.toLocaleString()} BDT</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-neutral-700 mb-2">
-                    <span>Discount</span>
+                  <div className="flex justify-between text-sm text-neutral-700 mb-1.5">
+                    <span className="pl-4 text-neutral-500">Discount on Admission</span>
                     <span className="text-green-700">
                       - {formState.discount.toLocaleString()} BDT
                     </span>
                   </div>
+                  <div className="flex justify-between text-sm font-medium text-neutral-800 mb-3 pb-2 border-b border-neutral-200">
+                    <span>Sub Total (Admission)</span>
+                    <span>{discountedAdmission.toLocaleString()} BDT</span>
+                  </div>
                 </>
               )}
-              <div className="flex justify-between text-sm font-semibold text-neutral-900">
-                <span>{formState.discount > 0 ? "Grand Total" : "Total"}</span>
+              {otherTotal > 0 && (
+                <div className="flex justify-between text-sm text-neutral-700 mb-2">
+                  <span>Other Fees</span>
+                  <span>{otherTotal.toLocaleString()} BDT</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-semibold text-neutral-900 pt-1 border-t border-neutral-300">
+                <span>Grand Total</span>
                 <span>{grandTotal.toLocaleString()} BDT</span>
               </div>
               <div className="mt-4">
@@ -399,8 +413,9 @@ export default function InvoiceForm() {
                   onChange={(e) =>
                     updateField("discount", Math.max(0, Number(e.target.value) || 0))
                   }
-                  placeholder="0"
-                  className="w-full max-w-[160px] text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                  disabled={!hasAdmission}
+                  placeholder={hasAdmission ? "0" : "Requires Admission Fee"}
+                  className="w-full max-w-[200px] text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
             </section>

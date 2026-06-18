@@ -1,8 +1,9 @@
 "use client";
 
-import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
-import { MoneyReceiptFormState } from "@/lib/types";
+import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { MoneyReceiptFormState, ReportHeaderDto } from "@/lib/types";
 import { numberToWords } from "@/lib/utils";
+import PDFHeader from "./PDFHeader";
 
 const styles = StyleSheet.create({
   page: {
@@ -11,7 +12,7 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 28,
     fontFamily: "Helvetica",
-    fontSize: 7.5,
+    fontSize: 8.5,
     color: "#424242",
   },
   half: {
@@ -22,57 +23,6 @@ const styles = StyleSheet.create({
     border: "1pt solid #a3a3a3",
     padding: 10,
     flex: 1,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  logoBox: {
-    width: 36,
-    height: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  logoImg: {
-    width: 36,
-    height: 28,
-    objectFit: "contain",
-  },
-  hdrCenter: {
-    flex: 1,
-  },
-  companyName: {
-    fontSize: 11,
-    fontFamily: "Helvetica-Bold",
-    color: "#0a2351",
-    textAlign: "center",
-  },
-  tagline: {
-    fontSize: 6.5,
-    color: "#737373",
-    textAlign: "center",
-  },
-  hdrRight: {
-    alignItems: "flex-end",
-  },
-  hdrLabel: {
-    fontSize: 6.5,
-    color: "#737373",
-  },
-  hdrValue: {
-    fontSize: 7,
-    fontFamily: "Helvetica-Bold",
-    color: "#171717",
-    marginBottom: 1,
-  },
-  title: {
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
-    color: "#0a2351",
-    textAlign: "center",
-    marginBottom: 6,
   },
   copyLabel: {
     fontSize: 7,
@@ -136,11 +86,23 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     color: "#171717",
   },
-  takaOnly: {
-    fontSize: 7,
-    color: "#424242",
-    textAlign: "right",
+  purposeRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 6,
+  },
+  purposeLabel: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: "#171717",
+    marginRight: 6,
+  },
+  purposeValue: {
+    fontSize: 8,
+    color: "#171717",
+    borderBottom: "1pt solid #171717",
+    flex: 1,
+    paddingBottom: 1,
   },
   innerDivider: {
     borderBottom: "1pt solid #d4d4d4",
@@ -208,6 +170,7 @@ const styles = StyleSheet.create({
   cutLine: {
     borderBottom: "1pt dashed #9ca3af",
     marginVertical: 8,
+    marginHorizontal: 10,
     textAlign: "center",
   },
   cutText: {
@@ -235,100 +198,91 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
   const inWords = formState.amount > 0 ? numberToWords(formState.amount) : "";
   const checkedMethods = formState.paymentMethods.filter((m) => m.checked);
 
+  const dateParts: string[] = [];
+  dateParts.push(`Receipt No: ${formState.receiptNo}`);
+  if (formState.invoiceNo) {
+    dateParts.push(`Invoice No: ${formState.invoiceNo}`);
+  }
+  dateParts.push(`Date: ${formState.date}`);
+
+  const headerData: ReportHeaderDto = {
+    title: "MONEY RECEIPT",
+    companyName: "Aevitas International School",
+    address: "House 66, Road 18, Block B, Banani, Dhaka 1213",
+    mobile: "+880 1711-111111",
+    dateLabel: dateParts.join("\n"),
+  };
+
   return (
     <View style={styles.receiptBorder}>
       <View style={styles.copyLabel}>
         <Text>{copyLabel}</Text>
       </View>
-
-      <View style={styles.headerRow}>
-        <View style={styles.logoBox}>
-          <Image style={styles.logoImg} src="/file.svg" />
-        </View>
-        <View style={styles.hdrCenter}>
-          <Text style={styles.companyName}>Aevitas International School</Text>
-          <Text style={styles.tagline}>International School</Text>
-        </View>
-        <View style={styles.hdrRight}>
-          <Text style={styles.hdrLabel}>Receipt No</Text>
-          <Text style={styles.hdrValue}>{formState.receiptNo}</Text>
-          {formState.invoiceNo ? (
-            <>
-              <Text style={[styles.hdrLabel, { marginTop: 2 }]}>Invoice No</Text>
-              <Text style={styles.hdrValue}>{formState.invoiceNo}</Text>
-            </>
-          ) : null}
-          <Text style={[styles.hdrLabel, { marginTop: 2 }]}>Date</Text>
-          <Text style={styles.hdrValue}>{formState.date}</Text>
-        </View>
-      </View>
-
-      <Text style={styles.title}>MONEY RECEIPT</Text>
+      <PDFHeader header={headerData} />
 
       <View style={styles.chequeBox}>
-        <View style={styles.payRow}>
-          <Text style={styles.payLabel}>PAY</Text>
-          <Text style={styles.payName}>{formState.payerName}</Text>
-        </View>
+          <View style={styles.payRow}>
+            <Text style={styles.payLabel}>Payment From</Text>
+            <Text style={styles.payName}>{formState.payerName}</Text>
+          </View>
 
-        <View style={styles.amountRow}>
-          <Text style={styles.sumLabel}>The sum of Taka</Text>
-          <Text style={styles.sumValue}>{inWords}</Text>
-          <View style={styles.amountBox}>
-            <Text style={styles.amountBoxText}>
-              BDT {formState.amount.toLocaleString()}
-            </Text>
+          <View style={styles.amountRow}>
+            <Text style={styles.sumLabel}>Amount in words</Text>
+            <Text style={styles.sumValue}>{inWords}</Text>
+            <View style={styles.amountBox}>
+              <Text style={styles.amountBoxText}>
+                BDT {formState.amount.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+
+          {formState.purpose ? (
+            <View style={styles.purposeRow}>
+              <Text style={styles.purposeLabel}>Payment Purpose</Text>
+              <Text style={styles.purposeValue}>{formState.purpose}</Text>
+            </View>
+          ) : null}
+
+          <View style={styles.innerDivider} />
+
+          <View style={styles.infoRow}>
+            <Text>Student Name:</Text>
+            <Text style={styles.infoValue}>{formState.studentName}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text>Student ID:</Text>
+            <Text style={styles.infoValue}>{formState.studentId}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text>Grade:</Text>
+            <Text style={styles.infoValue}>{formState.grade}</Text>
           </View>
         </View>
 
-        <Text style={styles.takaOnly}>Taka only</Text>
-
-        <View style={styles.innerDivider} />
-
-        <View style={styles.infoRow}>
-          <Text>Student Name:</Text>
-          <Text style={styles.infoValue}>{formState.studentName}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text>Student ID:</Text>
-          <Text style={styles.infoValue}>{formState.studentId}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text>Grade:</Text>
-          <Text style={styles.infoValue}>{formState.grade}</Text>
-        </View>
-        {formState.purpose && (
-          <View style={styles.infoRow}>
-            <Text>Purpose:</Text>
-            <Text style={styles.infoValue}>{formState.purpose}</Text>
+        {checkedMethods.length > 0 && (
+          <View>
+            <Text style={styles.sectionLabel}>Payment Method</Text>
+            {checkedMethods.map((method, idx) => (
+              <View key={idx} style={styles.methodRow}>
+                <Text style={styles.checkMark}>✓</Text>
+                <Text style={styles.methodName}>{method.method}</Text>
+                <Text style={styles.methodDetails}>{method.details}</Text>
+              </View>
+            ))}
           </View>
         )}
-      </View>
 
-      {checkedMethods.length > 0 && (
-        <View>
-          <Text style={styles.sectionLabel}>Payment Method</Text>
-          {checkedMethods.map((method, idx) => (
-            <View key={idx} style={styles.methodRow}>
-              <Text style={styles.checkMark}>✓</Text>
-              <Text style={styles.methodName}>{method.method}</Text>
-              <Text style={styles.methodDetails}>{method.details}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      <View style={styles.sigRow}>
-        <View style={styles.sigBlock}>
-          <View style={styles.sigLine} />
-          <Text style={styles.sigLabel}>Authorized Signature</Text>
-        </View>
-        <View style={styles.sigBlock}>
-          <View style={styles.sigLine} />
-          <Text style={styles.sigLabel}>Accounts Signature</Text>
+        <View style={styles.sigRow}>
+          <View style={styles.sigBlock}>
+            <View style={styles.sigLine} />
+            <Text style={styles.sigLabel}>Authorized Signature</Text>
+          </View>
+          <View style={styles.sigBlock}>
+            <View style={styles.sigLine} />
+            <Text style={styles.sigLabel}>Accounts Signature</Text>
+          </View>
         </View>
       </View>
-    </View>
   );
 }
 

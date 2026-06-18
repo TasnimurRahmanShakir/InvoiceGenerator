@@ -9,8 +9,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Aevitas — Fee Management",
-  description: "Generate fee invoices and money receipts",
+  title: "Aevitas — Invoice Management",
+  description: "Generate invoices and money receipts",
 };
 
 export default function RootLayout({

@@ -69,42 +69,44 @@ export const getPeriodDisplay = (item: FeeLineItem): string => {
 export const mapInvoiceToReportTableData = (
   formState: InvoiceFormState
 ): ReportTableData => {
-  const itemsTotal = formState.items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0
-  );
   const hasDiscount = formState.discount > 0;
-  const grandTotal = hasDiscount ? itemsTotal - formState.discount : itemsTotal;
+  const hasAdmission = formState.items.some((i) => i.feeItemId === "ADMISSION");
+  const discountApplicable = hasDiscount && hasAdmission;
 
-  const rows: ReportRowDto[] = formState.items.map((item, idx) => ({
-    cells: [
-      { text: String(idx + 1), alignment: "center" as const },
-      { text: item.description },
-      { text: getPeriodDisplay(item), alignment: "center" as const },
-      { text: `${item.quantity} ${item.unitLabel}`, alignment: "center" as const },
-      { text: item.unitPrice.toLocaleString(), alignment: "right" as const },
-      {
-        text: (item.unitPrice * item.quantity).toLocaleString(),
-        alignment: "right" as const,
-      },
-    ],
-  }));
+  const admissionItem = formState.items.find((i) => i.feeItemId === "ADMISSION");
+  const admissionFee = admissionItem ? admissionItem.unitPrice * admissionItem.quantity : 0;
+  const otherItems = formState.items.filter((i) => i.feeItemId !== "ADMISSION");
+  const otherTotal = otherItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  const discountedAdmission = discountApplicable ? admissionFee - formState.discount : admissionFee;
+  const grandTotal = discountedAdmission + otherTotal;
 
-  if (hasDiscount) {
+  let sl = 0;
+  const rows: ReportRowDto[] = [];
+
+  if (admissionItem) {
+    sl++;
+    rows.push({
+      cells: [
+        { text: String(sl), alignment: "center" as const },
+        { text: admissionItem.description },
+        { text: getPeriodDisplay(admissionItem), alignment: "center" as const },
+        { text: `${admissionItem.quantity} ${admissionItem.unitLabel}`, alignment: "center" as const },
+        { text: admissionItem.unitPrice.toLocaleString(), alignment: "right" as const },
+        { text: admissionFee.toLocaleString(), alignment: "right" as const },
+      ],
+    });
+  }
+
+  if (discountApplicable) {
     rows.push({
       cells: [
         { text: "" },
+        { text: "Discount on Admission" },
+        { text: "", alignment: "center" as const },
         { text: "" },
-        { text: "" },
-        { text: "" },
-        { text: "Sub Total", alignment: "right" as const, isBold: true },
-        {
-          text: itemsTotal.toLocaleString(),
-          alignment: "right" as const,
-          isBold: true,
-        },
+        { text: "", alignment: "right" as const },
+        { text: `-${formState.discount.toLocaleString()}`, alignment: "right" as const, isBold: true },
       ],
-      isSubTotal: true,
     });
     rows.push({
       cells: [
@@ -112,8 +114,26 @@ export const mapInvoiceToReportTableData = (
         { text: "" },
         { text: "" },
         { text: "" },
-        { text: "Discount", alignment: "right" as const, isBold: true },
-        { text: `-${formState.discount.toLocaleString()}`, alignment: "right" as const, isBold: true },
+        { text: "Sub Total (Admission)", alignment: "right" as const, isBold: true },
+        { text: discountedAdmission.toLocaleString(), alignment: "right" as const, isBold: true },
+      ],
+      isSubTotal: true,
+    });
+  }
+
+  for (const item of otherItems) {
+    sl++;
+    rows.push({
+      cells: [
+        { text: String(sl), alignment: "center" as const },
+        { text: item.description },
+        { text: getPeriodDisplay(item), alignment: "center" as const },
+        { text: `${item.quantity} ${item.unitLabel}`, alignment: "center" as const },
+        { text: item.unitPrice.toLocaleString(), alignment: "right" as const },
+        {
+          text: (item.unitPrice * item.quantity).toLocaleString(),
+          alignment: "right" as const,
+        },
       ],
     });
   }
@@ -138,9 +158,9 @@ export const mapInvoiceToReportTableData = (
     header: {
       title: "INVOICE",
       companyName: "Aevitas International School",
-      address: "House 66, Road 18, Block B, Banani, Dhaka 1213",
-      mobile: "+880 1711-111111",
-      dateLabel: `Invoice No: ${formState.invoiceNo}\nDate: ${formState.date}`,
+      address: "Plot: 32, Block: A, Aftabnagar Main Road, Dhaka 1212",
+      mobile: "+880 1717-539859",
+      dateLabel: `Invoice No: ${formState.invoiceNo}  \n  Date: ${formState.date}`,
     },
     studentInfo: {
       studentName: formState.studentName,
@@ -162,10 +182,10 @@ export const mapInvoiceToReportTableData = (
       inWords: numberToWords(grandTotal),
       notes: "Payment Terms: 100% payable at the time of admission.\nLate Fee: Tk. 100 per day will be charged for late payment.",
       paymentInfo: [
-        { method: "Bank (Dutch-Bangla Bank Ltd.)", details: "A/C: XXXX-XXXX-XXXX | Routing: XXXXXXXXX" },
-        { method: "bKash (Merchant)", details: "Merchant No: XXXXXXXXXX" },
-        { method: "Rocket (Merchant)", details: "Merchant No: XXXXXXXXXX" },
-        { method: "Nagad (Merchant)", details: "Merchant No: XXXXXXXXXX" },
+        { method: "Dutch-Bangla Bank Ltd.", details: "Name         : Aevitas International School\nA/C  No      : XXXX-XXXX-XXXX\nBranch        : Banani, Dhaka\nRouting No : XXXXXXXXX" },
+        { method: "bKash", details: "A/C No: XXXXXXXXXX" },
+        { method: "Rocket", details: "A/C No: XXXXXXXXXX" },
+        { method: "Nagad", details: "A/C No: XXXXXXXXXX" },
       ],
       signatures: [
         { label: "Guardian Signature" },

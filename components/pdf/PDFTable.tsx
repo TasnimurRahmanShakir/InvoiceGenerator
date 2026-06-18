@@ -120,7 +120,8 @@ function getCellStyle(
 function getTextStyle(
   cell: ReportCellDto,
   isSubTotal: boolean,
-  isGrandTotal: boolean
+  isGrandTotal: boolean,
+  colKey?: string
 ) {
   const color = cell.textColor
     ? cell.textColor
@@ -128,10 +129,12 @@ function getTextStyle(
       ? "#1a237e"
       : "#424242";
 
+  const isDescription = colKey === "description" && cell.text.trim().length > 0;
+
   return {
-    fontSize: 8,
+    fontSize: isSubTotal ? 8 : 9,
     color,
-    fontWeight: (cell.isBold || isSubTotal || isGrandTotal ? "bold" : "normal") as "bold" | "normal",
+    fontWeight: (cell.isBold || isSubTotal || isGrandTotal || isDescription ? "bold" : "normal") as "bold" | "normal",
     fontStyle: (cell.isItalic ? "italic" : "normal") as "italic" | "normal",
     textAlign: (cell.alignment === "right"
       ? "right"
@@ -159,8 +162,8 @@ export default function PDFTable({ columns, rows }: PDFTableProps) {
   const headerStyle = {
     paddingVertical: 5,
     paddingHorizontal: 5,
-    backgroundColor: "#F5F5F5",
-    border: "0.5pt solid #DEE2E6",
+    backgroundColor: "#0a2351",
+    border: "0.5pt solid #0a2351",
     justifyContent: "center" as const,
   };
 
@@ -171,17 +174,13 @@ export default function PDFTable({ columns, rows }: PDFTableProps) {
           <View key={col.key} style={[headerStyle, { width: colWidths[i] }]}>
             <Text
               style={{
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: "bold" as const,
-                color: "#212121",
-                textAlign: (col.alignment === "right"
-                  ? "right"
-                  : col.alignment === "center"
-                    ? "center"
-                    : "left") as "left" | "center" | "right",
+                color: "#FFFFFF",
+                textAlign: "center" as const,
               }}
             >
-              {col.title}
+              {col.title.toUpperCase()}
             </Text>
           </View>
         ))}
@@ -255,7 +254,7 @@ export default function PDFTable({ columns, rows }: PDFTableProps) {
                     key={`${ri}-${ci}`}
                     style={getCellStyle(cell, ri, isSub, isGrand, spanWidth)}
                   >
-                    <Text style={getTextStyle(cell, isSub, isGrand)}>
+                    <Text style={getTextStyle(cell, isSub, isGrand, col.key)}>
                       {cell.text}
                     </Text>
                   </View>

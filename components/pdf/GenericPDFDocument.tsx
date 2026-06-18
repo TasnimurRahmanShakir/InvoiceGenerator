@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     paddingTop: 72,
     paddingBottom: 36,
     fontFamily: "Helvetica",
-    fontSize: 9,
+    fontSize: 10,
     color: "#424242",
   },
   pageFooter: {
@@ -22,18 +22,32 @@ const styles = StyleSheet.create({
     bottom: 12,
     left: 58,
     right: 58,
-    textAlign: "center",
-    fontSize: 8,
+    paddingTop: 4,
+    borderTopWidth: 1.5,
+    borderTopColor: "#DEE2E6",
+    borderTopStyle: "solid",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    fontSize: 9,
     color: "#757575",
+  },
+  footerInfo: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  footerPageNum: {
+    textAlign: "right",
   },
   contentWrap: {
     flexGrow: 1,
   },
   signatureRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
   },
   signatureBlock: {
-    flex: 1,
+    width: 160,
     alignItems: "center",
     paddingTop: 10,
   },
@@ -43,12 +57,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   signatureLabel: {
-    fontSize: 9,
+    fontSize: 10,
     color: "#424242",
     textAlign: "center",
   },
   signatureName: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "bold",
     color: "#212121",
     textAlign: "center",
@@ -87,9 +101,16 @@ export default function GenericPDFDocument({
           </View>
         ) : null}
 
-        <Text style={styles.pageFooter} render={({ pageNumber, totalPages }) => (
-          `Page ${pageNumber} of ${totalPages} | Aevitas - Invoice`
-        )} fixed />
+        <View style={styles.pageFooter} fixed>
+          <View style={styles.footerInfo}>
+            {data.header.address ? <Text>{data.header.address}</Text> : null}
+            {data.header.address && data.header.mobile ? <Text>|</Text> : null}
+            {data.header.mobile ? <Text>Mobile: {data.header.mobile}</Text> : null}
+          </View>
+          <Text style={styles.footerPageNum} render={({ pageNumber, totalPages }) => (
+            `Page ${pageNumber} of ${totalPages}`
+          )} />
+        </View>
       </Page>
     </Document>
   );

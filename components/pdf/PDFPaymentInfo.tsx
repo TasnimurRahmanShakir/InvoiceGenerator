@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "bold",
     color: "#0a2351",
     marginBottom: 6,
@@ -25,22 +25,23 @@ const styles = StyleSheet.create({
     width: "30%",
     paddingVertical: 5,
     paddingHorizontal: 6,
-    backgroundColor: "#F5F5F5",
-    borderRight: "0.5pt solid #DEE2E6",
-    borderBottom: "0.5pt solid #DEE2E6",
+    backgroundColor: "#0a2351",
+    borderRight: "0.5pt solid #0a2351",
+    borderBottom: "0.5pt solid #0a2351",
   },
   headerCellWide: {
     width: "70%",
     paddingVertical: 5,
     paddingHorizontal: 6,
-    backgroundColor: "#F5F5F5",
-    borderRight: "0.5pt solid #DEE2E6",
-    borderBottom: "0.5pt solid #DEE2E6",
+    backgroundColor: "#0a2351",
+    borderRight: "0.5pt solid #0a2351",
+    borderBottom: "0.5pt solid #0a2351",
   },
   headerText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "bold",
-    color: "#212121",
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   dataCell: {
     width: "30%",
@@ -57,8 +58,22 @@ const styles = StyleSheet.create({
     borderBottom: "0.5pt solid #DEE2E6",
   },
   dataText: {
-    fontSize: 9,
+    fontSize: 10,
     color: "#424242",
+  },
+  detailRow: {
+    flexDirection: "row",
+    gap: 4,
+    marginBottom: 1,
+  },
+  detailLabel: {
+    fontSize: 10,
+    color: "#525252",
+    width: 80,
+  },
+  detailValue: {
+    fontSize: 10,
+    color: "#171717",
   },
 });
 
@@ -83,11 +98,26 @@ export default function PDFPaymentInfo({
         </View>
         {paymentInfo.map((row, i) => (
           <View style={styles.row} key={i}>
-            <View style={styles.dataCell}>
+            <View style={[styles.dataCell, { backgroundColor: i % 2 === 1 ? "#F8F9FA" : "#FFFFFF" }]}>
               <Text style={styles.dataText}>{row.method}</Text>
             </View>
-            <View style={styles.dataCellWide}>
-              <Text style={styles.dataText}>{row.details}</Text>
+            <View style={[styles.dataCellWide, { backgroundColor: i % 2 === 1 ? "#F8F9FA" : "#FFFFFF" }]}>
+              {row.details.split("\n").map((line, li) => {
+                const sepIdx = line.indexOf(": ");
+                if (sepIdx !== -1) {
+                  const label = line.slice(0, sepIdx);
+                  const value = line.slice(sepIdx + 2);
+                  return (
+                    <View key={li} style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>{label}</Text>
+                      <Text style={styles.detailValue}>: {value}</Text>
+                    </View>
+                  );
+                }
+                return (
+                  <Text key={li} style={styles.dataText}>{line}</Text>
+                );
+              })}
             </View>
           </View>
         ))}
