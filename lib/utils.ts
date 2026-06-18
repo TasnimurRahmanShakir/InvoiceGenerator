@@ -1,4 +1,4 @@
-import { ReportTableData, FeeLineItem, InvoiceFormState, MoneyReceiptFormState, ReportRowDto } from "./types";
+import { ReportTableData, FeeLineItem, InvoiceFormState, ReportRowDto } from "./types";
 
 const MONTHS_SHORT = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -140,7 +140,7 @@ export const mapInvoiceToReportTableData = (
       companyName: "Aevitas International School",
       address: "House 66, Road 18, Block B, Banani, Dhaka 1213",
       mobile: "+880 1711-111111",
-      dateLabel: `Date: ${formState.date}`,
+      dateLabel: `Invoice No: ${formState.invoiceNo}\nDate: ${formState.date}`,
     },
     studentInfo: {
       studentName: formState.studentName,
@@ -160,61 +160,6 @@ export const mapInvoiceToReportTableData = (
     rows,
     footer: {
       inWords: numberToWords(grandTotal),
-      notes: "Payment Terms: 100% payable at the time of admission.\nLate Fee: Tk. 100 per day will be charged for late payment.",
-      paymentInfo: [
-        { method: "Bank (Dutch-Bangla Bank Ltd.)", details: "A/C: XXXX-XXXX-XXXX | Routing: XXXXXXXXX" },
-        { method: "bKash (Merchant)", details: "Merchant No: XXXXXXXXXX" },
-        { method: "Rocket (Merchant)", details: "Merchant No: XXXXXXXXXX" },
-        { method: "Nagad (Merchant)", details: "Merchant No: XXXXXXXXXX" },
-      ],
-      signatures: [
-        { label: "Guardian Signature" },
-        { label: "Accounts Signature" },
-      ],
-    },
-  };
-};
-
-export const mapMoneyReceiptToReportTableData = (
-  formState: MoneyReceiptFormState
-): ReportTableData => {
-  return {
-    header: {
-      title: "MONEY RECEIPT",
-      companyName: "Aevitas International School",
-      address: "House 66, Road 18, Block B, Banani, Dhaka 1213",
-      mobile: "+880 1711-111111",
-      dateLabel: `Date: ${formState.date}`,
-    },
-    studentInfo: {
-      studentName: formState.studentName,
-      studentId: "",
-      grade: formState.grade,
-      parentName: formState.payerName,
-      parentMobile: "",
-    },
-    columns: [
-      { key: "sl", title: "SL", widthWeight: 0.5, alignment: "center" },
-      { key: "description", title: "Description", widthWeight: 3 },
-      { key: "type", title: "Type", widthWeight: 1.5, alignment: "center" },
-      { key: "qty", title: "Qty", widthWeight: 1, alignment: "center" },
-      { key: "rate", title: "Rate", widthWeight: 1, alignment: "right" },
-      { key: "amount", title: "Amount", widthWeight: 1, alignment: "right" },
-    ],
-    rows: [
-      {
-        cells: [
-          { text: "1", alignment: "center" as const },
-          { text: `Payment by ${formState.payerName}` },
-          { text: formState.paymentMethod, alignment: "center" as const },
-          { text: "1", alignment: "center" as const },
-          { text: formState.amount.toLocaleString(), alignment: "right" as const },
-          { text: formState.amount.toLocaleString(), alignment: "right" as const },
-        ],
-      },
-    ],
-    footer: {
-      inWords: numberToWords(formState.amount),
       notes: "Payment Terms: 100% payable at the time of admission.\nLate Fee: Tk. 100 per day will be charged for late payment.",
       paymentInfo: [
         { method: "Bank (Dutch-Bangla Bank Ltd.)", details: "A/C: XXXX-XXXX-XXXX | Routing: XXXXXXXXX" },

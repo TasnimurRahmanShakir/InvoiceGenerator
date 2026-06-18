@@ -105,12 +105,19 @@ export interface InvoiceFormState {
   items: FeeLineItem[];
 }
 
+export interface PaymentMethodDetail {
+  method: string;
+  checked: boolean;
+  details: string;
+}
+
 export interface MoneyReceiptFormState {
   receiptNo: string;
+  invoiceNo: string;
   studentName: string;
   grade: string;
   payerName: string;
   amount: number;
   date: string;
-  paymentMethod: PaymentMethod;
+  paymentMethods: PaymentMethodDetail[];
 }

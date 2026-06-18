@@ -1,25 +1,43 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { PDFViewer, pdf } from "@react-pdf/renderer";
+import { PDFViewer } from "@react-pdf/renderer";
 import { GRADE_LEVELS } from "@/config/company";
-import { PaymentMethod } from "@/lib/types";
-import type { MoneyReceiptFormState } from "@/lib/types";
-import { mapMoneyReceiptToReportTableData, numberToWords } from "@/lib/utils";
-import GenericPDFDocument from "@/components/pdf/GenericPDFDocument";
+import type { MoneyReceiptFormState, PaymentMethodDetail } from "@/lib/types";
+import { numberToWords } from "@/lib/utils";
+import PDFChequeReceipt from "@/components/pdf/PDFChequeReceipt";
+
+const DEFAULT_METHODS: PaymentMethodDetail[] = [
+  { method: "Cash", checked: false, details: "" },
+  { method: "Cheque", checked: false, details: "" },
+  { method: "bKash", checked: false, details: "" },
+  { method: "Rocket", checked: false, details: "" },
+  { method: "Nagad", checked: false, details: "" },
+  { method: "Card", checked: false, details: "" },
+];
 
 function getDefaultForm(): MoneyReceiptFormState {
   const today = new Date().toISOString().split("T")[0];
   return {
     receiptNo: `AEV-RCT-${Date.now().toString(36).toUpperCase()}`,
+    invoiceNo: "",
     studentName: "",
     grade: "EY1",
     payerName: "",
     amount: 0,
     date: today,
-    paymentMethod: PaymentMethod.Cash,
+    paymentMethods: DEFAULT_METHODS.map((m) => ({ ...m })),
   };
 }
+
+const METHOD_PLACEHOLDERS: Record<string, string> = {
+  Cheque: "Cheque No, Bank Name",
+  bKash: "Transaction ID, Sender No",
+  Rocket: "Transaction ID, Sender No",
+  Nagad: "Transaction ID, Sender No",
+  Card: "Last 4 digits, Trx ID",
+  Cash: "",
+};
 
 export default function MoneyReceiptForm() {
   const [form, setForm] = useState<MoneyReceiptFormState>(getDefaultForm);
@@ -35,22 +53,25 @@ export default function MoneyReceiptForm() {
     []
   );
 
-  const handleGenerate = useCallback(async () => {
-    const data = mapMoneyReceiptToReportTableData(
-      form
-    );
-    const blob = await pdf(<GenericPDFDocument reportTableData={data} />).toBlob();
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-  }, [form]);
+  const toggleMethod = useCallback((index: number) => {
+    setForm((prev) => {
+      const methods = [...prev.paymentMethods];
+      methods[index] = { ...methods[index], checked: !methods[index].checked };
+      return { ...prev, paymentMethods: methods };
+    });
+  }, []);
 
-  const reportData = mapMoneyReceiptToReportTableData(
-    form
-  );
+  const updateMethodDetail = useCallback((index: number, details: string) => {
+    setForm((prev) => {
+      const methods = [...prev.paymentMethods];
+      methods[index] = { ...methods[index], details };
+      return { ...prev, paymentMethods: methods };
+    });
+  }, []);
 
   const amountInWords = form.amount > 0 ? numberToWords(form.amount) : "";
 
-  const methods = Object.values(PaymentMethod);
+  const checkedMethods = form.paymentMethods.filter((m) => m.checked);
 
   return (
     <div className="h-full flex flex-col">
@@ -60,7 +81,7 @@ export default function MoneyReceiptForm() {
             Money Receipt
           </h2>
           <p className="text-xs text-neutral-600 mt-0.5">
-            Issue a payment receipt for a student — Aevitas
+            Issue a payment receipt — Aevitas
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -70,19 +91,13 @@ export default function MoneyReceiptForm() {
           >
             {showPDF ? "Close preview" : "Preview"}
           </button>
-          <button
-            onClick={handleGenerate}
-            disabled={!form.payerName || form.amount <= 0}
-            className="px-4 py-1.5 text-xs font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            Generate PDF
-          </button>
         </div>
       </div>
 
       <div className="flex-1 flex min-h-0">
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-2xl mx-auto px-8 py-8 space-y-8">
+            {/* Receipt Details */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Receipt Details
@@ -110,9 +125,22 @@ export default function MoneyReceiptForm() {
                     className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 focus:outline-none focus:border-neutral-900 transition-colors"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs text-neutral-700 mb-1.5">
+                    Invoice No
+                  </label>
+                  <input
+                    type="text"
+                    value={form.invoiceNo}
+                    onChange={(e) => updateField("invoiceNo", e.target.value)}
+                    placeholder="Optional"
+                    className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                  />
+                </div>
               </div>
             </section>
 
+            {/* Student Info */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Student Info
@@ -159,6 +187,7 @@ export default function MoneyReceiptForm() {
               </div>
             </section>
 
+            {/* Amount */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Amount
@@ -170,7 +199,6 @@ export default function MoneyReceiptForm() {
                 <input
                   type="number"
                   min={0}
-                  step={0.01}
                   value={form.amount || ""}
                   onChange={(e) =>
                     updateField(
@@ -178,38 +206,47 @@ export default function MoneyReceiptForm() {
                       Math.max(0, Number(e.target.value) || 0)
                     )
                   }
-                  placeholder="0.00"
+                  placeholder="0"
                   className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
                 />
                 {amountInWords && (
                   <p className="mt-2 text-xs text-neutral-600">
-                    {amountInWords} Taka only
+                    {amountInWords}
                   </p>
                 )}
               </div>
             </section>
 
+            {/* Payment Method */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Payment Method
               </h3>
-              <div className="flex gap-1.5">
-                {methods.map((method) => {
-                  const isSelected = form.paymentMethod === method;
-                  return (
-                    <button
-                      key={method}
-                      onClick={() => updateField("paymentMethod", method)}
-                      className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors ${
-                        isSelected
-                          ? "border-neutral-900 bg-neutral-900 text-white"
-                          : "border-neutral-400 text-neutral-700 hover:border-neutral-500 hover:text-neutral-900"
-                      }`}
-                    >
-                      {method}
-                    </button>
-                  );
-                })}
+              <div className="space-y-3">
+                {form.paymentMethods.map((method, idx) => (
+                  <div key={method.method} className="flex items-start gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer mt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={method.checked}
+                        onChange={() => toggleMethod(idx)}
+                        className="h-4 w-4 rounded border-neutral-400 text-neutral-900 focus:ring-neutral-900"
+                      />
+                      <span className="text-sm text-neutral-900">
+                        {method.method}
+                      </span>
+                    </label>
+                    {method.checked && METHOD_PLACEHOLDERS[method.method] && (
+                      <input
+                        type="text"
+                        value={method.details}
+                        onChange={(e) => updateMethodDetail(idx, e.target.value)}
+                        placeholder={METHOD_PLACEHOLDERS[method.method]}
+                        className="flex-1 text-sm bg-transparent border-b border-neutral-400 pb-1 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
             </section>
           </div>
@@ -221,7 +258,7 @@ export default function MoneyReceiptForm() {
               style={{ width: "100%", height: "100%", border: "none" }}
               showToolbar
             >
-              <GenericPDFDocument reportTableData={reportData} />
+              <PDFChequeReceipt formState={form} />
             </PDFViewer>
           </div>
         )}
