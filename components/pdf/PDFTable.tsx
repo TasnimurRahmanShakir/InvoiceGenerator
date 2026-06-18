@@ -93,14 +93,12 @@ function getCellStyle(
   isGrandTotal: boolean,
   colWidth: string
 ) {
-  let bgColor = "#FFFFFF";
+  let bgColor = "transparent";
 
   if (isGrandTotal) {
-    bgColor = "#EEEEEE";
+    bgColor = "transparent";
   } else if (isSubTotal) {
-    bgColor = "#E3F2FD";
-  } else if (rowIndex % 2 === 1) {
-    bgColor = "#F8F9FA";
+    bgColor = "transparent";
   }
 
   if (cell.backgroundColor) {
@@ -206,8 +204,7 @@ export default function PDFTable({ columns, rows }: PDFTableProps) {
                       ci < s.colIndex + s.colSpan
                   );
                   if (isCovered) {
-                    let bg = "#FFFFFF";
-                    if (ri % 2 === 1) bg = "#F8F9FA";
+                    let bg = "transparent";
 
                     const coveringSpan = spans.find(
                       (s) =>
@@ -218,8 +215,8 @@ export default function PDFTable({ columns, rows }: PDFTableProps) {
                     );
                     if (coveringSpan) {
                       const sr = rows[coveringSpan.rowIndex];
-                      if (sr?.isGrandTotal) bg = "#EEEEEE";
-                      else if (sr?.isSubTotal) bg = "#E3F2FD";
+                      if (sr?.isGrandTotal) bg = "transparent";
+                      else if (sr?.isSubTotal) bg = "transparent";
                     }
 
                     return (
@@ -282,10 +279,9 @@ export default function PDFTable({ columns, rows }: PDFTableProps) {
           const isSpanSub = !!spanRow?.isSubTotal;
           const isSpanGrand = !!spanRow?.isGrandTotal;
 
-          let bgColor = "#FFFFFF";
-          if (isSpanGrand) bgColor = "#EEEEEE";
-          else if (isSpanSub) bgColor = "#E3F2FD";
-          else if (span.rowIndex % 2 === 1) bgColor = "#F8F9FA";
+          let bgColor = "transparent";
+          if (isSpanGrand) bgColor = "transparent";
+          else if (isSpanSub) bgColor = "transparent";
           if (span.cell.backgroundColor) bgColor = span.cell.backgroundColor;
 
           return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Document, Page, View, Text, StyleSheet, Svg, Path, Circle, Line, G } from "@react-pdf/renderer";
+import { Document, Page, View, Text, StyleSheet, Svg, Path, Circle, Line, G, Image } from "@react-pdf/renderer";
 import { MoneyReceiptFormState, ReportHeaderDto } from "@/lib/types";
 import { numberToWords } from "@/lib/utils";
 import PDFHeader from "./PDFHeader";
@@ -195,6 +195,21 @@ const styles = StyleSheet.create({
     borderBottomColor: "#9ca3af",
     borderBottomStyle: "dashed",
   },
+  receiptWatermark: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  receiptWatermarkImg: {
+    width: 150,
+    height: 100,
+    opacity: 0.07,
+  },
 });
 
 interface Props {
@@ -306,6 +321,10 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
           <Text render={({ pageNumber, totalPages }) => (
             `Page ${pageNumber} of ${totalPages}`
           )} />
+        </View>
+
+        <View style={styles.receiptWatermark}>
+          <Image style={styles.receiptWatermarkImg} src="/Aevitas_Watermark.png" />
         </View>
       </View>
   );

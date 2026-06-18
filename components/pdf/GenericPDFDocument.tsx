@@ -1,6 +1,6 @@
 "use client";
 
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Document, Page, StyleSheet, Text, View, Image } from "@react-pdf/renderer";
 import type { ReportTableData } from "@/lib/types";
 import PDFHeader from "./PDFHeader";
 import PDFStudentInfo from "./PDFStudentInfo";
@@ -67,6 +67,21 @@ const styles = StyleSheet.create({
     color: "#212121",
     textAlign: "center",
   },
+  watermark: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  watermarkImg: {
+    width: 200,
+    height: 140,
+    opacity: 0.1,
+  },
 });
 
 export default function GenericPDFDocument({
@@ -110,6 +125,10 @@ export default function GenericPDFDocument({
           <Text style={styles.footerPageNum} render={({ pageNumber, totalPages }) => (
             `Page ${pageNumber} of ${totalPages}`
           )} />
+        </View>
+
+        <View style={styles.watermark}>
+          <Image style={styles.watermarkImg} src="/Aevitas_Watermark.png" />
         </View>
       </Page>
     </Document>
