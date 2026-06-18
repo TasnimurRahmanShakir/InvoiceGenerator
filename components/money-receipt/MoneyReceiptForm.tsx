@@ -10,16 +10,14 @@ import PDFChequeReceipt from "@/components/pdf/PDFChequeReceipt";
 const DEFAULT_METHODS: PaymentMethodDetail[] = [
   { method: "Cash", checked: false, details: "" },
   { method: "Cheque", checked: false, details: "" },
-  { method: "bKash", checked: false, details: "" },
-  { method: "Rocket", checked: false, details: "" },
-  { method: "Nagad", checked: false, details: "" },
-  { method: "Card", checked: false, details: "" },
+  { method: "MFS", checked: false, details: "" },
+  { method: "Bank Transfer", checked: false, details: "" },
 ];
 
 function getDefaultForm(): MoneyReceiptFormState {
   const today = new Date().toISOString().split("T")[0];
   return {
-    receiptNo: `AEV-RCT-${Date.now().toString(36).toUpperCase()}`,
+    receiptNo: `AIS-RCT-${Date.now().toString(36).toUpperCase()}`,
     invoiceNo: "",
     studentName: "",
     studentId: "",
@@ -31,15 +29,6 @@ function getDefaultForm(): MoneyReceiptFormState {
     paymentMethods: DEFAULT_METHODS.map((m) => ({ ...m })),
   };
 }
-
-const METHOD_PLACEHOLDERS: Record<string, string> = {
-  "Bank Transfer": "Bank Name, Account No",
-  Cheque: "Cheque No, Bank Name",
-  bKash: "Transaction ID, Sender No",
-  Rocket: "Transaction ID, Sender No",
-  Nagad: "Transaction ID, Sender No",
-  Cash: "",
-};
 
 export default function MoneyReceiptForm() {
   const [form, setForm] = useState<MoneyReceiptFormState>(getDefaultForm);
@@ -63,20 +52,16 @@ export default function MoneyReceiptForm() {
     });
   }, []);
 
-  const updateMethodDetail = useCallback((index: number, details: string) => {
-    setForm((prev) => {
-      const methods = [...prev.paymentMethods];
-      methods[index] = { ...methods[index], details };
-      return { ...prev, paymentMethods: methods };
-    });
-  }, []);
-
   const amountInWords = form.amount > 0 ? numberToWords(form.amount) : "";
 
   const handleGenerate = useCallback(async () => {
     const blob = await pdf(<PDFChequeReceipt formState={form} />).toBlob();
     const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Receipt-${form.receiptNo}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
   }, [form]);
 
   return (
@@ -261,30 +246,25 @@ export default function MoneyReceiptForm() {
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
                 Payment Method
               </h3>
-              <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
                 {form.paymentMethods.map((method, idx) => (
-                  <div key={method.method} className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={method.checked}
-                        onChange={() => toggleMethod(idx)}
-                        className="h-4 w-4 rounded border-neutral-400 text-neutral-900 focus:ring-neutral-900"
-                      />
-                      <span className="text-sm text-neutral-900">
-                        {method.method}
-                      </span>
-                    </label>
-                    {method.checked && METHOD_PLACEHOLDERS[method.method] && (
-                      <input
-                        type="text"
-                        value={method.details}
-                        onChange={(e) => updateMethodDetail(idx, e.target.value)}
-                        placeholder={METHOD_PLACEHOLDERS[method.method]}
-                        className="w-full sm:flex-1 text-sm bg-transparent border-b border-neutral-400 pb-1 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
-                      />
+                  <button
+                    key={method.method}
+                    type="button"
+                    onClick={() => toggleMethod(idx)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-150 border ${
+                      method.checked
+                        ? "bg-neutral-900 text-white border-neutral-900"
+                        : "bg-white text-neutral-700 border-neutral-300 hover:border-neutral-500 hover:text-neutral-900"
+                    }`}
+                  >
+                    {method.checked && (
+                      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     )}
-                  </div>
+                    {method.method}
+                  </button>
                 ))}
               </div>
             </section>

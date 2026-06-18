@@ -1,6 +1,6 @@
 "use client";
 
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, View, Text, StyleSheet, Svg, Path } from "@react-pdf/renderer";
 import { MoneyReceiptFormState, ReportHeaderDto } from "@/lib/types";
 import { numberToWords } from "@/lib/utils";
 import PDFHeader from "./PDFHeader";
@@ -125,27 +125,24 @@ const styles = StyleSheet.create({
     color: "#0a2351",
     marginBottom: 3,
   },
-  methodRow: {
+  methodsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    alignItems: "center",
+  },
+  methodPill: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 2,
-  },
-  checkMark: {
-    fontSize: 9,
-    fontFamily: "Helvetica-Bold",
-    color: "#0a2351",
-    width: 14,
+    gap: 2,
   },
   methodName: {
     fontSize: 8,
     fontFamily: "Helvetica-Bold",
     color: "#171717",
-    width: 60,
   },
-  methodDetails: {
-    fontSize: 8,
-    color: "#525252",
-    flex: 1,
+  methodUnchecked: {
+    color: "#a3a3a3",
   },
   sigRow: {
     flexDirection: "row",
@@ -201,7 +198,6 @@ interface Props {
 
 function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
   const inWords = formState.amount > 0 ? numberToWords(formState.amount) : "";
-  const checkedMethods = formState.paymentMethods.filter((m) => m.checked);
 
   const dateParts: string[] = [];
   dateParts.push(`Receipt No: ${formState.receiptNo}`);
@@ -264,18 +260,30 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
           </View>
         </View>
 
-        {checkedMethods.length > 0 && (
-          <View>
+        <View>
             <Text style={styles.sectionLabel}>Payment Method</Text>
-            {checkedMethods.map((method, idx) => (
-              <View key={idx} style={styles.methodRow}>
-                <Text style={styles.checkMark}>✓</Text>
-                <Text style={styles.methodName}>{method.method}</Text>
-                <Text style={styles.methodDetails}>{method.details}</Text>
-              </View>
-            ))}
+            <View style={styles.methodsRow}>
+              {formState.paymentMethods.map((method, idx) => (
+                <View key={idx} style={styles.methodPill}>
+                  {method.checked && (
+                    <Svg width={8} height={8} viewBox="0 0 24 24">
+                      <Path
+                        d="M5 13l4 4L19 7"
+                        stroke="#0a2351"
+                        strokeWidth={3}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  )}
+                  <Text style={[styles.methodName, ...(method.checked ? [] : [styles.methodUnchecked])]}>
+                    {method.method}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-        )}
 
         <View style={styles.sigRow}>
           <View style={styles.sigBlock}>

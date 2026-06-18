@@ -13,7 +13,7 @@ import { GRADE_LEVELS } from "@/config/company";
 
 function getDefaultForm(): InvoiceFormState {
   return {
-    invoiceNo: `AEV-INV-${Date.now().toString(36).toUpperCase()}`,
+    invoiceNo: `AIS-INV-${Date.now().toString(36).toUpperCase()}`,
     date: new Date().toISOString().split("T")[0],
     studentName: "",
     studentId: "",
