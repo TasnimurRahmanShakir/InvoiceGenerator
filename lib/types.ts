@@ -118,6 +118,7 @@ export interface MoneyReceiptFormState {
   studentId: string;
   grade: string;
   payerName: string;
+  purpose: string;
   amount: number;
   date: string;
   paymentMethods: PaymentMethodDetail[];

@@ -25,6 +25,7 @@ function getDefaultForm(): MoneyReceiptFormState {
     studentId: "",
     grade: "EY1",
     payerName: "",
+    purpose: "",
     amount: 0,
     date: today,
     paymentMethods: DEFAULT_METHODS.map((m) => ({ ...m })),
@@ -214,30 +215,44 @@ export default function MoneyReceiptForm() {
             {/* Amount */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
-                Amount
+                Payment
               </h3>
-              <div className="max-w-xs">
-                <label className="block text-xs text-neutral-700 mb-1.5">
-                  Amount (BDT)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.amount || ""}
-                  onChange={(e) =>
-                    updateField(
-                      "amount",
-                      Math.max(0, Number(e.target.value) || 0)
-                    )
-                  }
-                  placeholder="0"
-                  className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
-                />
-                {amountInWords && (
-                  <p className="mt-2 text-xs text-neutral-600">
-                    {amountInWords}
-                  </p>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div>
+                  <label className="block text-xs text-neutral-700 mb-1.5">
+                    Purpose
+                  </label>
+                  <input
+                    type="text"
+                    value={form.purpose}
+                    onChange={(e) => updateField("purpose", e.target.value)}
+                    placeholder='e.g. "Tuition fee June 2026"'
+                    className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-neutral-700 mb-1.5">
+                    Amount (BDT)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.amount || ""}
+                    onChange={(e) =>
+                      updateField(
+                        "amount",
+                        Math.max(0, Number(e.target.value) || 0)
+                      )
+                    }
+                    placeholder="0"
+                    className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                  />
+                  {amountInWords && (
+                    <p className="mt-2 text-xs text-neutral-600">
+                      {amountInWords}
+                    </p>
+                  )}
+                </div>
               </div>
             </section>
 

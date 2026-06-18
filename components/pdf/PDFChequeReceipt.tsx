@@ -297,6 +297,12 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
           <Text>Grade:</Text>
           <Text style={styles.infoValue}>{formState.grade}</Text>
         </View>
+        {formState.purpose && (
+          <View style={styles.infoRow}>
+            <Text>Purpose:</Text>
+            <Text style={styles.infoValue}>{formState.purpose}</Text>
+          </View>
+        )}
       </View>
 
       {checkedMethods.length > 0 && (
