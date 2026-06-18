@@ -33,11 +33,11 @@ function getDefaultForm(): MoneyReceiptFormState {
 }
 
 const METHOD_PLACEHOLDERS: Record<string, string> = {
+  "Bank Transfer": "Bank Name, Account No",
   Cheque: "Cheque No, Bank Name",
   bKash: "Transaction ID, Sender No",
   Rocket: "Transaction ID, Sender No",
   Nagad: "Transaction ID, Sender No",
-  Card: "Last 4 digits, Trx ID",
   Cash: "",
 };
 
@@ -292,7 +292,7 @@ export default function MoneyReceiptForm() {
         </div>
 
         {showPDF && (
-          <div className="w-full md:w-[480px] h-80 md:h-auto shrink-0 border-t md:border-t-0 md:border-l border-neutral-300 bg-white">
+          <div className="w-full md:w-120 h-80 md:h-auto shrink-0 border-t md:border-t-0 md:border-l border-neutral-300 bg-white">
             <PDFViewer
               style={{ width: "100%", height: "100%", border: "none" }}
               showToolbar

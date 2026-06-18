@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   copyLabel: {
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: "Helvetica-Bold",
     color: "#0a2351",
     textAlign: "center",
@@ -44,13 +44,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   payLabel: {
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: "Helvetica-Bold",
     color: "#171717",
     marginRight: 6,
   },
   payName: {
-    fontSize: 8,
+    fontSize: 9,
     color: "#171717",
     borderBottom: "1pt solid #171717",
     flex: 1,
@@ -62,13 +62,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   sumLabel: {
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: "Helvetica-Bold",
     color: "#171717",
     marginRight: 6,
   },
   sumValue: {
-    fontSize: 8,
+    fontSize: 9,
     color: "#171717",
     borderBottom: "1pt solid #171717",
     flex: 1,
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   amountBoxText: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: "Helvetica-Bold",
     color: "#171717",
   },
@@ -92,13 +92,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   purposeLabel: {
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: "Helvetica-Bold",
     color: "#171717",
     marginRight: 6,
   },
   purposeValue: {
-    fontSize: 8,
+    fontSize: 9,
     color: "#171717",
     borderBottom: "1pt solid #171717",
     flex: 1,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 3,
     marginBottom: 1,
-    fontSize: 7,
+    fontSize: 8,
     color: "#424242",
   },
   infoValue: {
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     color: "#171717",
   },
   sectionLabel: {
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: "Helvetica-Bold",
     color: "#0a2351",
     marginBottom: 3,
@@ -131,19 +131,19 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   checkMark: {
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: "Helvetica-Bold",
     color: "#0a2351",
     width: 14,
   },
   methodName: {
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: "Helvetica-Bold",
     color: "#171717",
     width: 60,
   },
   methodDetails: {
-    fontSize: 7,
+    fontSize: 8,
     color: "#525252",
     flex: 1,
   },
@@ -163,30 +163,35 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   sigLabel: {
-    fontSize: 7,
+    fontSize: 8,
     color: "#424242",
     textAlign: "center",
+  },
+  receiptFooter: {
+    borderTopWidth: 1.5,
+    borderTopColor: "#DEE2E6",
+    borderTopStyle: "solid",
+    paddingTop: 3,
+    marginTop: 6,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    fontSize: 7.5,
+    color: "#757575",
+  },
+  footerInfo: {
+    flexDirection: "row",
+    gap: 4,
   },
   cutLine: {
     borderBottom: "1pt dashed #9ca3af",
     marginVertical: 8,
-    marginHorizontal: 10,
     textAlign: "center",
   },
   cutText: {
-    fontSize: 6,
+    fontSize: 7.5,
     color: "#9ca3af",
     textAlign: "center",
     marginTop: -9,
-  },
-  pageFooter: {
-    position: "absolute",
-    bottom: 10,
-    left: 48,
-    right: 48,
-    textAlign: "center",
-    fontSize: 6.5,
-    color: "#9ca3af",
   },
 });
 
@@ -282,6 +287,17 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
             <Text style={styles.sigLabel}>Accounts Signature</Text>
           </View>
         </View>
+
+        <View style={styles.receiptFooter}>
+          <View style={styles.footerInfo}>
+            <Text>Plot: 32, Block: A, Aftabnagar Main Road, Dhaka 1212</Text>
+            <Text> | </Text>
+            <Text>Mobile: +880 1717-539859</Text>
+          </View>
+          <Text render={({ pageNumber, totalPages }) => (
+            `Page ${pageNumber} of ${totalPages}`
+          )} />
+        </View>
       </View>
   );
 }
@@ -301,10 +317,6 @@ export default function PDFChequeReceipt({ formState }: Props) {
         <View style={styles.half}>
           <ReceiptHalf formState={formState} copyLabel="ACCOUNTS COPY" />
         </View>
-
-        <Text style={styles.pageFooter} render={({ pageNumber, totalPages }) => (
-          `Page ${pageNumber} of ${totalPages} | Aevitas - Receipt`
-        )} fixed />
       </Page>
     </Document>
   );
