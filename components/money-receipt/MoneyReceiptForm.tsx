@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { PDFViewer } from "@react-pdf/renderer";
+import { PDFViewer, pdf } from "@react-pdf/renderer";
 import { GRADE_LEVELS } from "@/config/company";
 import type { MoneyReceiptFormState, PaymentMethodDetail } from "@/lib/types";
 import { numberToWords } from "@/lib/utils";
@@ -22,6 +22,7 @@ function getDefaultForm(): MoneyReceiptFormState {
     receiptNo: `AEV-RCT-${Date.now().toString(36).toUpperCase()}`,
     invoiceNo: "",
     studentName: "",
+    studentId: "",
     grade: "EY1",
     payerName: "",
     amount: 0,
@@ -71,6 +72,12 @@ export default function MoneyReceiptForm() {
 
   const amountInWords = form.amount > 0 ? numberToWords(form.amount) : "";
 
+  const handleGenerate = useCallback(async () => {
+    const blob = await pdf(<PDFChequeReceipt formState={form} />).toBlob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  }, [form]);
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between gap-3 px-4 md:px-8 py-4 border-b border-neutral-300 bg-white">
@@ -88,6 +95,13 @@ export default function MoneyReceiptForm() {
             className="px-3 py-1.5 text-xs font-medium text-neutral-700 hover:text-neutral-900 border border-neutral-400 rounded-md hover:bg-neutral-200 transition-colors"
           >
             {showPDF ? "Close" : "Preview"}
+          </button>
+          <button
+            onClick={handleGenerate}
+            disabled={!form.payerName || form.amount <= 0}
+            className="px-4 py-1.5 text-xs font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            PDF
           </button>
         </div>
       </div>
@@ -153,6 +167,18 @@ export default function MoneyReceiptForm() {
                     value={form.studentName}
                     onChange={(e) => updateField("studentName", e.target.value)}
                     placeholder="Full name"
+                    className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-neutral-700 mb-1.5">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    value={form.studentId}
+                    onChange={(e) => updateField("studentId", e.target.value)}
+                    placeholder="STU-001"
                     className="w-full text-sm bg-transparent border-b border-neutral-400 pb-1.5 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-neutral-900 transition-colors"
                   />
                 </div>

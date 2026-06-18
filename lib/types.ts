@@ -115,6 +115,7 @@ export interface MoneyReceiptFormState {
   receiptNo: string;
   invoiceNo: string;
   studentName: string;
+  studentId: string;
   grade: string;
   payerName: string;
   amount: number;

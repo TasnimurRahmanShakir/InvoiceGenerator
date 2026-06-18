@@ -290,6 +290,10 @@ function ReceiptHalf({ formState, copyLabel }: Props & { copyLabel: string }) {
           <Text style={styles.infoValue}>{formState.studentName}</Text>
         </View>
         <View style={styles.infoRow}>
+          <Text>Student ID:</Text>
+          <Text style={styles.infoValue}>{formState.studentId}</Text>
+        </View>
+        <View style={styles.infoRow}>
           <Text>Grade:</Text>
           <Text style={styles.infoValue}>{formState.grade}</Text>
         </View>
