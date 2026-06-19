@@ -4,11 +4,12 @@ import { useState, useCallback } from "react";
 import {
   InvoiceFormState,
   FeeLineItem,
+  ReportTableData,
 } from "@/lib/types";
 import { getFeesForGrade } from "@/data/cost-map";
 import { mapInvoiceToReportTableData } from "@/lib/utils";
 import GenericPDFDocument from "@/components/pdf/GenericPDFDocument";
-import { PDFDownloadLink, PDFViewer } from "@react-pdf/renderer";
+import { PDFViewer, pdf } from "@react-pdf/renderer";
 import { GRADE_LEVELS } from "@/config/company";
 
 function getDefaultForm(): InvoiceFormState {
@@ -29,6 +30,7 @@ export default function InvoiceForm() {
   const [formState, setFormState] =
     useState<InvoiceFormState>(getDefaultForm);
   const [showPDF, setShowPDF] = useState(false);
+  const [previewData, setPreviewData] = useState<ReportTableData | null>(null);
 
   const availableFees = formState.grade
     ? getFeesForGrade(formState.grade)
@@ -74,6 +76,19 @@ export default function InvoiceForm() {
     }));
   }, []);
 
+  const handleDownload = useCallback(async () => {
+    const currentData = mapInvoiceToReportTableData(formState);
+    const blob = await pdf(
+      <GenericPDFDocument reportTableData={currentData} />
+    ).toBlob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Invoice_${formState.invoiceNo || "draft"}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [formState]);
+
   const handleItemChange = useCallback(
     (index: number, field: keyof FeeLineItem, value: string | number) => {
       setFormState((prev) => {
@@ -99,8 +114,6 @@ export default function InvoiceForm() {
     [availableFees]
   );
 
-  const reportTableData = mapInvoiceToReportTableData(formState);
-
   const hasAdmission = formState.items.some((i) => i.feeItemId === "ADMISSION");
   const admissionItem = formState.items.find((i) => i.feeItemId === "ADMISSION");
   const admissionTotal = admissionItem ? admissionItem.unitPrice * admissionItem.quantity : 0;
@@ -125,24 +138,32 @@ export default function InvoiceForm() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setShowPDF((v) => !v)}
+            onClick={() => {
+              if (showPDF) {
+                setShowPDF(false);
+                setPreviewData(null);
+              } else {
+                setPreviewData(mapInvoiceToReportTableData(formState));
+                setShowPDF(true);
+              }
+            }}
             className="px-3 py-1.5 text-xs font-medium text-neutral-700 hover:text-neutral-900 border border-neutral-400 rounded-md hover:bg-neutral-200 transition-colors"
           >
             {showPDF ? "Close" : "Preview"}
           </button>
-          <PDFDownloadLink
-            document={<GenericPDFDocument reportTableData={reportTableData} />}
-            fileName={`Invoice_${formState.invoiceNo || "draft"}.pdf`}
+          <button
+            onClick={handleDownload}
+            disabled={formState.items.length === 0}
             className="px-4 py-1.5 text-xs font-medium text-white bg-neutral-900 rounded-md hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
-            {({ loading }) => (loading ? "Loading..." : "PDF")}
-          </PDFDownloadLink>
+            PDF
+          </button>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0">
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
+          <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
           {/* Invoice Details */}
           <section>
             <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
@@ -258,7 +279,7 @@ export default function InvoiceForm() {
               return (
                 <div
                   key={index}
-                  className="grid grid-cols-2 md:grid-cols-7 gap-3 md:gap-4 mb-4 pb-4 border-b border-neutral-200 items-end"
+                  className="grid grid-cols-2 md:grid-cols-8 gap-3 md:gap-4 mb-4 pb-4 border-b border-neutral-200 items-end"
                 >
                   <div className="col-span-2 md:col-span-2">
                     <label className="block text-xs text-neutral-700 mb-1.5">
@@ -326,7 +347,7 @@ export default function InvoiceForm() {
                     <input
                       type="number"
                       min={0}
-                      value={item.unitPrice}
+                      value={item.unitPrice || ""}
                       onChange={(e) =>
                         handleItemChange(index, "unitPrice", Math.max(0, parseFloat(e.target.value) || 0))
                       }
@@ -341,13 +362,19 @@ export default function InvoiceForm() {
                       {(item.unitPrice * item.quantity).toLocaleString()}
                     </p>
                   </div>
-                  <div className="flex items-end pb-1 md:pb-1.5">
+                  <div>
+                    <label className="block text-xs text-neutral-700 mb-1.5">
+                      Action
+                    </label>
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="text-xs text-neutral-500 hover:text-red-600 transition-colors"
+                      className="text-neutral-400 hover:text-red-600 transition-colors pt-1"
+                      title="Remove item"
                     >
-                      Remove
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -409,7 +436,7 @@ export default function InvoiceForm() {
                 <input
                   type="number"
                   min={0}
-                  value={formState.discount}
+                  value={formState.discount || ""}
                   onChange={(e) =>
                     updateField("discount", Math.max(0, Number(e.target.value) || 0))
                   }
@@ -423,13 +450,13 @@ export default function InvoiceForm() {
         </div>
         </div>
 
-        {showPDF && (
+        {showPDF && previewData && (
           <div className="w-full md:w-[480px] h-80 md:h-auto shrink-0 border-t md:border-t-0 md:border-l border-neutral-300 bg-white">
             <PDFViewer
               style={{ width: "100%", height: "100%", border: "none" }}
               showToolbar
             >
-              <GenericPDFDocument reportTableData={reportTableData} />
+              <GenericPDFDocument reportTableData={previewData} />
             </PDFViewer>
           </div>
         )}

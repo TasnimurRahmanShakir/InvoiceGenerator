@@ -34,6 +34,7 @@ function getDefaultForm(): MoneyReceiptFormState {
 export default function MoneyReceiptForm() {
   const [form, setForm] = useState<MoneyReceiptFormState>(getDefaultForm);
   const [showPDF, setShowPDF] = useState(false);
+  const [previewForm, setPreviewForm] = useState<MoneyReceiptFormState | null>(null);
 
   const updateField = useCallback(
     <K extends keyof MoneyReceiptFormState>(
@@ -78,7 +79,15 @@ export default function MoneyReceiptForm() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setShowPDF((v) => !v)}
+            onClick={() => {
+              if (showPDF) {
+                setShowPDF(false);
+                setPreviewForm(null);
+              } else {
+                setPreviewForm({ ...form });
+                setShowPDF(true);
+              }
+            }}
             className="px-3 py-1.5 text-xs font-medium text-neutral-700 hover:text-neutral-900 border border-neutral-400 rounded-md hover:bg-neutral-200 transition-colors"
           >
             {showPDF ? "Close" : "Preview"}
@@ -95,7 +104,7 @@ export default function MoneyReceiptForm() {
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0">
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
+          <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
             {/* Receipt Details */}
             <section>
               <h3 className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-4">
@@ -293,13 +302,13 @@ export default function MoneyReceiptForm() {
           </div>
         </div>
 
-        {showPDF && (
+        {showPDF && previewForm && (
           <div className="w-full md:w-120 h-80 md:h-auto shrink-0 border-t md:border-t-0 md:border-l border-neutral-300 bg-white">
             <PDFViewer
               style={{ width: "100%", height: "100%", border: "none" }}
               showToolbar
             >
-              <PDFChequeReceipt formState={form} />
+              <PDFChequeReceipt formState={previewForm} />
             </PDFViewer>
           </div>
         )}
